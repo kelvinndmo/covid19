@@ -48,7 +48,7 @@ class MyHeader extends StatelessWidget {
             Expanded(
               child: Stack(
                 children: [
-                  Image.asset(
+                  SvgPicture.asset(
                     image,
                     width: 220,
                     fit: BoxFit.fitWidth,

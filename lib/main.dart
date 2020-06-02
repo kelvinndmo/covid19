@@ -1,4 +1,6 @@
 import 'package:covid_19/constant.dart';
+import 'package:covid_19/info_screen.dart';
+import 'package:covid_19/screens/loading_screen.dart';
 import 'package:covid_19/widgets/counter.dart';
 import 'package:covid_19/widgets/my_header.dart';
 import 'package:flutter/cupertino.dart';
@@ -20,12 +22,52 @@ class MyApp extends StatelessWidget {
           textTheme: TextTheme(
             body1: TextStyle(color: kBodyTextColor),
           )),
-      home: HomeScreen(),
+      home: LoadingScreen(),
     );
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  final int covidConfirmed;
+  final int covidDeaths;
+  final int recoveredCases;
+
+  const HomeScreen(
+      {Key key,
+      @required this.covidConfirmed,
+      @required this.covidDeaths,
+      @required this.recoveredCases})
+      : super(key: key);
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int confirmedCases;
+  int recoveredCases;
+  int deathCases;
+  String countryValue = "Kenya";
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    updateUI(
+        covidConfirmed: widget.covidConfirmed,
+        covidDeaths: widget.covidDeaths,
+        covidRecovered: widget.recoveredCases);
+  }
+
+  //get data here
+  void updateUI({int covidConfirmed, int covidDeaths, int covidRecovered}) {
+    setState(() {
+      confirmedCases = covidConfirmed;
+      recoveredCases = covidRecovered;
+      deathCases = covidDeaths;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -36,7 +78,13 @@ class HomeScreen extends StatelessWidget {
             size: size,
             image: "assets/images/patient.png",
           ),
-          CustomDropDownMenu(),
+          CustomDropDownMenu(
+            countries: [
+              {"country": "Kenya", "value": "Kenya"},
+              {"country": "Uganda", "value": "Uganda"},
+            ],
+            value: countryValue,
+          ),
           SizedBox(
             height: 10,
           ),
@@ -65,7 +113,11 @@ class HomeScreen extends StatelessWidget {
                 SizedBox(
                   height: 10,
                 ),
-                CustomDetailsCard(),
+                CustomDetailsCard(
+                  confirmedCases: confirmedCases,
+                  recoveredCases: recoveredCases,
+                  deathCases: deathCases,
+                ),
                 SizedBox(
                   height: 10,
                 ),
@@ -111,9 +163,16 @@ class HomeScreen extends StatelessWidget {
 }
 
 class CustomDetailsCard extends StatelessWidget {
-  const CustomDetailsCard({
-    Key key,
-  }) : super(key: key);
+  final int confirmedCases;
+  final int recoveredCases;
+  final int deathCases;
+
+  const CustomDetailsCard(
+      {Key key,
+      @required this.confirmedCases,
+      @required this.deathCases,
+      @required this.recoveredCases})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -131,17 +190,17 @@ class CustomDetailsCard extends StatelessWidget {
           children: [
             Counter(
               color: Colors.purple,
-              number: 1087,
+              number: confirmedCases,
               title: "Infected",
             ),
             Counter(
               color: kDeathColor,
-              number: 87,
+              number: deathCases,
               title: "Deaths",
             ),
             Counter(
               color: kRecovercolor,
-              number: 1000,
+              number: recoveredCases,
               title: "Recovered",
             )
           ],
@@ -149,10 +208,27 @@ class CustomDetailsCard extends StatelessWidget {
   }
 }
 
-class CustomDropDownMenu extends StatelessWidget {
-  const CustomDropDownMenu({
-    Key key,
-  }) : super(key: key);
+class CustomDropDownMenu extends StatefulWidget {
+  final List<dynamic> countries;
+  final String value;
+
+  const CustomDropDownMenu({@required this.countries, this.value});
+
+  @override
+  State<StatefulWidget> createState() => _CustomDropDownMenu();
+}
+
+class _CustomDropDownMenu extends State<CustomDropDownMenu> {
+  String value;
+  List<dynamic> countries;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    countries = widget.countries;
+    value = widget.value;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -179,13 +255,17 @@ class CustomDropDownMenu extends StatelessWidget {
                 isExpanded: true,
                 underline: SizedBox(),
                 icon: SvgPicture.asset("assets/icons/dropdown.svg"),
-                value: "Nairobi",
-                onChanged: (value) {},
-                items: ['Nairobi', 'Uganda', 'Tanzania']
-                    .map<DropdownMenuItem<String>>((String value) {
+                value: value,
+                onChanged: (valuee) {
+                  setState(() {
+                    value = valuee;
+                  });
+                },
+                items:
+                    countries.map<DropdownMenuItem<dynamic>>((dynamic value) {
                   return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
+                    value: value['value'],
+                    child: Text(value['value']),
                   );
                 }).toList()),
           )
